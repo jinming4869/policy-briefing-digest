@@ -94,3 +94,4 @@ try {
 }
 
 Write-Host "All release checks passed." -ForegroundColor Green
+exit 0
