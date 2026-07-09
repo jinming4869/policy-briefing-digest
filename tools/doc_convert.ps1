@@ -1,4 +1,4 @@
-# doc_convert.ps1
+﻿# doc_convert.ps1
 # 旧格式文档转换器: .doc → .docx / .txt
 # 用法: powershell -NoProfile -File tools/doc_convert.ps1 -Input "file.doc" [-Output "file.docx"] [-Format docx|txt]
 # 依赖: Microsoft Word (COM)

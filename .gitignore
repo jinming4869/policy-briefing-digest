@@ -1,0 +1,22 @@
+# 飞书实际配置（含内部 URL）
+configs/feishu_targets.yaml
+
+# 依赖与缓存
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 临时输出文件（Agent 运行产物）
+*.tmp
+*.bak
+desc.xml
+interp.xml

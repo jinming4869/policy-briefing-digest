@@ -1,5 +1,5 @@
 # 飞书文档目标配置模板
-# 1. 将本文件重命名为 feishu_targets.yaml（已在 .gitignore 中排除）
+# 1. 复制本文件为 feishu_targets.yaml（该文件已在 .gitignore 中排除）
 # 2. 填入你的飞书 wiki/doc URL 和各栏目标题
 # 3. 飞书接入完整流程见 README §飞书接入
 

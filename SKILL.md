@@ -107,7 +107,7 @@ v2 的重点是两条：
 |------|------|----------|
 | Python 3.10+ | 数据处理 | `winget install python` 或 [python.org](https://python.org) |
 | Node.js 18+ / npm | 辅助脚本 | `winget install nodejs` 或 [nodejs.org](https://nodejs.org) |
-| 飞书 CLI (`lark-cli`) | 文档读写 | `npm i -g lark-cli`（见 [§飞书接入](#飞书接入)） |
+| 飞书 CLI (`lark-cli`) | 文档读写 | `npx @larksuite/cli@latest install` |
 | PowerShell 5.1+ | 工具脚本运行环境 | Windows 预装 |
 
 项目工具脚本（`tools/` 目录下）：
@@ -133,7 +133,7 @@ v2 的重点是两条：
 建议检查项：
 
 1. `lark-cli.cmd` 是否存在。
-2. `lark-cli doctor` 是否通过。
+2. `lark-cli auth status` 是否显示已登录且具备文档权限。
 3. 是否可读取目标 wiki/docx/doc。
 4. 是否可解析 URL 到 wiki token 或 docx token。
 5. 是否可定位目标栏目标题。
@@ -1093,7 +1093,7 @@ policy-briefing-digest/
     doc_convert.ps1             # .doc → .docx 转换
     gov_search.ps1              # gov.cn 政策搜索
   configs/
-    feishu_targets.yaml         # 飞书文档URL + 栏目heading
+    feishu_targets.template.yaml # 飞书文档 URL + 栏目 heading 模板
   content/
     writing_rubric.md
     style_rules.md

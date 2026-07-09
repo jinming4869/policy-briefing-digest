@@ -1,4 +1,4 @@
-# gov_search.ps1
+﻿# gov_search.ps1
 # gov.cn 政策文件库搜索 — 用于精确检索政府官方政策文件
 # 用法: powershell -NoProfile -File tools/gov_search.ps1 -Keywords "数据出境" [-MaxResults 10]
 # 输出: JSON 格式的搜索结果列表
@@ -70,11 +70,15 @@ try {
     }
   }
 
+  if ($results.Count -eq 0) {
+    throw "页面可访问，但没有解析到结构化搜索结果。"
+  }
+
 } catch {
   Write-Warning "HTTP 请求失败: $_"
-  Write-Warning "可能原因：gov.cn 搜索需要特定 cookie 或反爬保护。"
+  Write-Warning "自动检索不可用，可能是页面结构变化、Cookie 要求或反爬限制。"
   Write-Warning "手动搜索地址: https://sousuo.www.gov.cn/zcwjk/"
-  Write-Warning "输入关键词后复制结果到页面。"
+  Write-Warning "请在官方页面输入关键词，并将结果交给 Agent 继续核验。"
 
   # Fallback: output manual search instructions
   $results = @([PSCustomObject]@{
