@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>政策周报 · 决策面板</title>
+<style>
+  :root {
+    --bg: #f8f7f4; --card: #ffffff; --border: #e6e4dd;
+    --text: #2c2c2c; --muted: #8c8c8c;
+    --accent: #1a6b4b; --accent-hover: #145a3e;
+    --warn: #b85c1a; --warn-bg: #fef6ee;
+    --tag-bg: #eef4f0; --tag-text: #1a6b4b;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Serif SC", "PingFang SC", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh;
+  }
+  .container { max-width: 700px; margin: 0 auto; padding: 36px 20px 80px; }
+  header { margin-bottom: 28px; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  .paste-zone {
+    background: var(--card); border: 2px dashed var(--border);
+    border-radius: 10px; padding: 28px 24px; text-align: center;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .paste-zone:hover { border-color: var(--accent); background: #fafdf9; }
+  .paste-zone textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; font-size: 12px; font-family: "JetBrains Mono", "SF Mono", monospace;
+    background: var(--bg); resize: vertical; min-height: 100px; margin-top: 12px;
+    display: none; line-height: 1.5;
+  }
+  .paste-zone.expanded textarea { display: block; }
+  .paste-zone.expanded { border-style: solid; cursor: default; background: var(--card); }
+  .paste-zone.expanded:hover { border-color: var(--border); background: var(--card); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+
+  .status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 16px; font-size: 13px;
+  }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot.empty { background: #ccc; }
+  .dot.ready { background: var(--accent); }
+  .dot.active { background: var(--warn); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .decision {
+    background: var(--card); border: 1px solid var(--warn); border-left: 4px solid var(--warn);
+    border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow);
+    animation: slideIn .25s ease-out;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .decision .d-num { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--warn); margin-bottom: 6px; }
+  .decision .d-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .decision .d-detail { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.7; }
+  .decision .d-type { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; transition: all .1s; font-size: 14px;
+  }
+  .option:hover { border-color: var(--accent); background: #fafdf9; }
+  .option.selected { border-color: var(--accent); background: #f0f7f3; }
+  .option .radio-btn, .option .checkbox-btn {
+    width: 18px; height: 18px; border: 2px solid var(--border);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .option .radio-btn { border-radius: 50%; }
+  .option .checkbox-btn { border-radius: 4px; }
+  .option.selected .radio-btn { border-color: var(--accent); background: var(--accent); }
+  .option.selected .radio-btn::after { content:''; width:6px; height:6px; border-radius:50%; background:#fff; }
+  .option.selected .checkbox-btn { border-color: var(--accent); background: var(--accent); }
+  .option.selected .checkbox-btn::after { content:'✓'; color:#fff; font-size:10px; font-weight:700; }
+
+  .upload-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow); display: none;
+  }
+  .upload-card.visible { display: block; }
+  .upload-zone {
+    border: 1.5px dashed var(--border); border-radius: 8px; padding: 20px;
+    text-align: center; cursor: pointer; transition: all .15s; background: var(--bg);
+  }
+  .upload-zone:hover { border-color: var(--accent); background: #f0f7f3; }
+  .upload-zone input[type="file"] { display: none; }
+  .file-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--tag-bg); color: var(--tag-text);
+    padding: 4px 10px; border-radius: 4px; font-size: 12px; margin: 2px 4px 2px 0;
+  }
+  .file-tag .remove { cursor: pointer; opacity: .5; }
+  .file-tag .remove:hover { opacity: 1; }
+
+  .result-bar {
+    display: none; align-items: center; gap: 12px;
+    padding: 14px 18px; background: var(--card); border: 1px solid var(--accent);
+    border-radius: 10px; margin-top: 20px;
+  }
+  .result-bar.visible { display: flex; }
+  .result-text { font-size: 13px; flex: 1; color: var(--muted); white-space: pre-wrap; }
+
+  .help-text {
+    font-size: 11px; color: var(--muted); margin-top: 20px;
+    line-height: 1.6; padding: 12px 16px; background: var(--bg);
+    border-radius: 6px; border: 1px solid var(--border);
+  }
+  .help-text code { background:#e8e8e0; padding:1px 5px; border-radius:3px; font-size:10px; }
+
+  @media (max-width:600px) {
+    .container { padding: 20px 10px 60px; }
+    .result-bar { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>⚡ 政策周报决策面板</h1>
+  <p>Agent 遇到不确定性时输出决策卡片 → 粘贴到这里 → 自动渲染 → 选择 → 复制回对话</p>
+</header>
+
+<div class="status">
+  <div class="dot empty" id="statusDot"></div>
+  <span id="statusText">等待 Agent 的决策卡片</span>
+</div>
+
+<div class="paste-zone" id="pasteZone" onclick="expandPasteZone()">
+  <div style="font-size:28px;margin-bottom:6px;">📥</div>
+  <div>点击此处，粘贴 Agent 的整段回复</div>
+  <div style="font-size:11px;color:var(--muted);margin-top:4px;">自动识别 JSON 并渲染决策卡片</div>
+  <textarea id="jsonInput" placeholder="直接粘贴即可。支持：纯 JSON、Markdown 中的 `json` 代码块、或附带其他文字的回复。" onclick="event.stopPropagation()"></textarea>
+</div>
+
+<div id="decisionContainer"></div>
+
+<div class="upload-card" id="uploadCard">
+  <h3 style="font-size:14px;margin-bottom:10px;">📎 附带文件</h3>
+  <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+    <div>点击上传政策原文、配套文件或截图</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px;">PDF、DOCX、PNG、JPG</div>
+    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt,.zip" onchange="handleFiles(event,this.files)">
+  </div>
+  <div id="fileList" style="margin-top:8px;"></div>
+</div>
+
+<div class="result-bar" id="resultBar">
+  <span class="result-text" id="resultText"></span>
+  <button class="btn btn-primary" onclick="copyResult()" style="white-space:nowrap;">复制结果</button>
+  <button class="btn btn-secondary" onclick="copyResultAsPrompt()" style="white-space:nowrap;">复制为 Prompt</button>
+</div>
+
+<div class="help-text">
+  <strong>Agent 协议</strong>：Agent 在对话中输出如下 JSON 代码块，用户粘贴到这里。<br>
+  <code>{"decisions":[{"id":"唯一id","title":"标题","detail":"描述","type":"single|multi","options":[{"id":"x","label":"选项"}]}]}</code><br>
+  <strong>卡片数量、选项数量、交互轮次</strong>均由 Agent 根据具体政策动态生成，不做预设。
+</div>
+
+</div>
+
+<script>
+let state = { decisions:[], answers:{}, files:[] };
+
+function expandPasteZone() {
+  document.getElementById('pasteZone').classList.add('expanded');
+}
+
+// ===== AUTO-DETECT =====
+const jsonInput = document.getElementById('jsonInput');
+let detectTimer;
+jsonInput.addEventListener('input', () => {
+  clearTimeout(detectTimer);
+  detectTimer = setTimeout(tryAutoRender, 350);
+});
+
+function tryAutoRender() {
+  const raw = jsonInput.value.trim();
+  if (!raw || raw.length < 20) return;
+  const json = extractJSON(raw);
+  if (!json) return;
+  try {
+    const data = JSON.parse(json);
+    if (!data.decisions || !Array.isArray(data.decisions) || data.decisions.length === 0) return;
+    state.decisions = data.decisions;
+    state.answers = {};
+    doRender();
+  } catch(e) { /* keep typing */ }
+}
+
+function extractJSON(text) {
+  // Markdown ```json ... ``` block
+  const m = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+  if (m) return m[1].trim();
+  // Raw JSON
+  if (/^\s*\{/.test(text) && /\}\s*$/.test(text)) return text;
+  // Find {"decisions":...} in mixed text
+  const m2 = text.match(/\{[^{}]*"decisions"/);
+  if (m2) {
+    let depth = 0, start = m2.index, end = start;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      if (text[i] === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
+    }
+    return text.substring(start, end);
+  }
+  return null;
+}
+
+function doRender() {
+  const container = document.getElementById('decisionContainer');
+  container.innerHTML = state.decisions.map((d, i) => `
+    <div class="decision">
+      <div class="d-num">决策 ${i+1}/${state.decisions.length}</div>
+      <div class="d-title">${esc(d.title)}</div>
+      <div class="d-detail">${esc(d.detail)}</div>
+      <div class="d-type">${d.type==='multi' ? '🔲 可多选' : '🔘 单选'}</div>
+      <div class="options">
+        ${d.options.map(o => `
+          <div class="option ${d.type==='multi'?'multi':''}" data-decision="${d.id}" data-option="${o.id}" onclick="selectOption(this,'${d.id}','${o.id}','${d.type}')">
+            <div class="${d.type==='multi'?'checkbox-btn':'radio-btn'}"></div>
+            ${esc(o.label)}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('uploadCard').classList.add('visible');
+  document.getElementById('resultBar').classList.remove('visible');
+  setStatus('active', `${state.decisions.length} 个决策卡片已渲染，请选择`);
+  container.scrollIntoView({behavior:'smooth'});
+}
+
+function selectOption(el, decId, optId, type) {
+  if (type === 'single') {
+    el.parentElement.querySelectorAll('.option').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    state.answers[decId] = [optId];
+  } else {
+    el.classList.toggle('selected');
+    state.answers[decId] = [...el.parentElement.querySelectorAll('.option.selected')].map(s => s.dataset.option);
+  }
+  buildResult();
+}
+
+function buildResult() {
+  if (Object.keys(state.answers).length < state.decisions.length) {
+    document.getElementById('resultBar').classList.remove('visible');
+    return;
+  }
+  const lines = state.decisions.map(d => {
+    const picked = state.answers[d.id] || [];
+    const labels = picked.map(pid => {
+      const opt = d.options.find(o => o.id === pid);
+      return opt ? opt.label : pid;
+    });
+    return `**${d.title}** → ${labels.join('、')}`;
+  });
+  if (state.files.length > 0) lines.push(`📎 附带文件：${state.files.map(f=>f.name).join('、')}`);
+  document.getElementById('resultText').textContent = lines.join('\n');
+  document.getElementById('resultBar').classList.add('visible');
+  setStatus('ready', '全部决策已完成');
+}
+
+function handleFiles(event, fileList) {
+  event.stopPropagation();
+  state.files = [...state.files, ...Array.from(fileList)];
+  document.getElementById('fileList').innerHTML = state.files.map((f,i) =>
+    `<span class="file-tag">${f.name}<span class="remove" onclick="removeFile(${i})">✕</span></span>`
+  ).join('');
+}
+function removeFile(i) { state.files.splice(i,1); buildResult(); }
+
+function copyResult() {
+  navigator.clipboard.writeText(document.getElementById('resultText').textContent).then(flash);
+}
+function copyResultAsPrompt() {
+  const lines = state.decisions.map(d => {
+    const picked = state.answers[d.id] || [];
+    return `${d.id}: ${picked.join(',')}`;
+  });
+  const extra = state.files.length > 0 ? '\n附带文件：' + state.files.map(f=>f.name).join('、') : '';
+  navigator.clipboard.writeText('用户决策：\n' + lines.join('\n') + extra).then(flash);
+}
+function flash() {
+  const btn = document.querySelector('#resultBar .btn-primary');
+  const o = btn.textContent; btn.textContent = '✅ 已复制';
+  setTimeout(() => btn.textContent = o, 1200);
+}
+
+function setStatus(cls, text) {
+  document.getElementById('statusDot').className = 'dot ' + cls;
+  document.getElementById('statusText').textContent = text;
+}
+function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
