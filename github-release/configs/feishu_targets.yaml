@@ -1,0 +1,19 @@
+# 飞书文档目标配置模板
+# 1. 将本文件重命名为 feishu_targets.yaml（已在 .gitignore 中排除）
+# 2. 填入你的飞书 wiki/doc URL 和各栏目标题
+# 3. 飞书接入完整流程见 README §飞书接入
+
+policy_digest:
+  current_week:
+    url: "https://xxxxx.feishu.cn/wiki/xxxxxxxx"    # 本期周报飞书 wiki URL
+    type: "wiki"                                      # wiki / doc / docx
+    docx_token: ""                                    # 如已知 docx_token 可直接填写
+    sections:
+      industry_regulation:
+        heading: "一、行业监管动态"
+      policy_law_release:
+        heading: "二、政策法规发布"
+      industry_policy:
+        heading: "三、产业政策指引"
+      overseas_compliance:
+        heading: "四、海外合规风向"
